@@ -17,6 +17,7 @@ A basic REST API built with **FastAPI** and **Python 3.10+**.
 | GET | `/` | Health check |
 | GET | `/items` | List all items |
 | GET | `/items/{id}` | Get item by ID |
+| GET | `/invoices` | List all invoices (optional `?status=` filter) |
 | GET | `/invoices/{invoice_id}` | Get invoice by ID |
 | POST | `/items` | Create a new item |
 | PUT | `/items/{id}` | Update an item |
