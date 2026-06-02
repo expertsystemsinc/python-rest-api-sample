@@ -5,6 +5,7 @@ A basic REST API built with **FastAPI** and **Python 3.10+**.
 ## Features
 
 - Full **CRUD** operations on an `Items` resource
+- Read-only `Invoices` resource: list (with optional `status` filter) and fetch-by-ID
 - Auto-generated interactive docs via **Swagger UI** (`/docs`) and **ReDoc** (`/redoc`)
 - In-memory data store (easy to swap for a real database)
 - Pydantic v2 request/response validation
@@ -16,6 +17,7 @@ A basic REST API built with **FastAPI** and **Python 3.10+**.
 | GET | `/` | Health check |
 | GET | `/items` | List all items |
 | GET | `/items/{id}` | Get item by ID |
+| GET | `/invoices/{invoice_id}` | Get invoice by ID |
 | POST | `/items` | Create a new item |
 | PUT | `/items/{id}` | Update an item |
 | DELETE | `/items/{id}` | Delete an item |
@@ -50,6 +52,15 @@ curl http://localhost:8000/items
 
 # Get a single item
 curl http://localhost:8000/items/1
+
+# List all invoices
+curl http://localhost:8000/invoices
+
+# List only paid invoices
+curl "http://localhost:8000/invoices?status=paid"
+
+# Get a single invoice
+curl http://localhost:8000/invoices/INV-1001
 
 # Create an item
 curl -X POST http://localhost:8000/items \
