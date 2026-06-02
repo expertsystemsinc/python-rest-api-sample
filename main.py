@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime
@@ -18,6 +18,27 @@ items_db: dict = {
     3: {"id": 3, "name": "Cherry", "description": "Sweet cherries", "price": 2.99, "created_at": "2024-01-01T00:00:00"},
 }
 next_id = 4
+
+invoices_db: dict = {
+    "INV-1001": {
+        "id": "INV-1001",
+        "vendor": "Acme Supplies",
+        "amount": 199.99,
+        "currency": "USD",
+        "status": "paid",
+        "issued_at": "2024-01-15T00:00:00",
+        "due_at": "2024-02-14T00:00:00",
+    },
+    "INV-1002": {
+        "id": "INV-1002",
+        "vendor": "Globex Corporation",
+        "amount": 1249.50,
+        "currency": "USD",
+        "status": "pending",
+        "issued_at": "2024-02-01T00:00:00",
+        "due_at": "2024-03-02T00:00:00",
+    },
+}
 
 
 # ---------------------------------------------------------------------------
@@ -43,6 +64,16 @@ class Item(BaseModel):
     created_at: str
 
 
+class Invoice(BaseModel):
+    id: str
+    vendor: str
+    amount: float
+    currency: str
+    status: str
+    issued_at: str
+    due_at: str
+
+
 # ---------------------------------------------------------------------------
 # Routes
 # ---------------------------------------------------------------------------
@@ -65,6 +96,28 @@ def get_item(item_id: int):
     if item_id not in items_db:
         raise HTTPException(status_code=404, detail=f"Item {item_id} not found")
     return items_db[item_id]
+
+
+@app.get("/invoices", response_model=List[Invoice], tags=["Invoices"])
+def list_invoices(
+    status: Optional[str] = Query(
+        None,
+        description="Filter invoices by status (e.g. 'paid', 'pending').",
+    ),
+):
+    """Return all invoices, optionally filtered by status."""
+    invoices = list(invoices_db.values())
+    if status is not None:
+        invoices = [inv for inv in invoices if inv["status"] == status]
+    return invoices
+
+
+@app.get("/invoices/{invoice_id}", response_model=Invoice, tags=["Invoices"])
+def get_invoice(invoice_id: str):
+    """Return a single invoice by ID."""
+    if invoice_id not in invoices_db:
+        raise HTTPException(status_code=404, detail=f"Invoice {invoice_id} not found")
+    return invoices_db[invoice_id]
 
 
 @app.post("/items", response_model=Item, status_code=201, tags=["Items"])
