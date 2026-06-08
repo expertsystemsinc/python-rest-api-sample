@@ -10,8 +10,14 @@ app = FastAPI(
 )
 
 # ---------------------------------------------------------------------------
-# In-memory "database"
+# In-memory "databases"
 # ---------------------------------------------------------------------------
+users_db: dict = {
+    1: {"id": 1, "name": "Alice Johnson", "email": "alice@example.com", "created_at": "2024-01-01T00:00:00"},
+    2: {"id": 2, "name": "Bob Smith", "email": "bob@example.com", "created_at": "2024-01-01T00:00:00"},
+    3: {"id": 3, "name": "Carol White", "email": "carol@example.com", "created_at": "2024-01-01T00:00:00"},
+}
+
 items_db: dict = {
     1: {"id": 1, "name": "Apple", "description": "A fresh red apple", "price": 0.99, "created_at": "2024-01-01T00:00:00"},
     2: {"id": 2, "name": "Banana", "description": "A ripe yellow banana", "price": 0.49, "created_at": "2024-01-01T00:00:00"},
@@ -23,6 +29,14 @@ next_id = 4
 # ---------------------------------------------------------------------------
 # Schemas
 # ---------------------------------------------------------------------------
+
+class User(BaseModel):
+    id: int
+    name: str
+    email: str
+    created_at: str
+
+
 class ItemCreate(BaseModel):
     name: str
     description: Optional[str] = None
@@ -52,6 +66,28 @@ def root():
     """Health check / welcome endpoint."""
     return {"message": "Welcome to the Sample REST API!", "status": "ok"}
 
+
+# ---------------------------------------------------------------------------
+# Users Routes
+# ---------------------------------------------------------------------------
+
+@app.get("/users", response_model=List[User], tags=["Users"])
+def list_users():
+    """Return all users."""
+    return list(users_db.values())
+
+
+@app.get("/users/{user_id}", response_model=User, tags=["Users"])
+def get_user(user_id: int):
+    """Return a single user by ID."""
+    if user_id not in users_db:
+        raise HTTPException(status_code=404, detail=f"User {user_id} not found")
+    return users_db[user_id]
+
+
+# ---------------------------------------------------------------------------
+# Items Routes
+# ---------------------------------------------------------------------------
 
 @app.get("/items", response_model=List[Item], tags=["Items"])
 def list_items():
